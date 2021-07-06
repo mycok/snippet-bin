@@ -57,3 +57,4 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("Create a new snippet...."))
 }
+
