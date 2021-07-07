@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-type Application struct {
+type application struct {
 	infoLog *log.Logger
 	errLog *log.Logger
 }
@@ -19,7 +19,7 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	app := &Application{
+	app := &application{
 		infoLog: infoLog,
 		errLog: errLog,
 	}
