@@ -24,22 +24,12 @@ func main() {
 		errLog: errLog,
 	}
 
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet", app.showSnippet)
-	mux.HandleFunc("/snippet/create", app.createSnippet)
-
-	fileServer := http.FileServer(http.Dir("./ui/static"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-
 	infoLog.Printf("Starting server on %s", *addr)
 
 	server := &http.Server{
 		Addr: *addr,
 		ErrorLog: errLog,
-		Handler: mux,
+		Handler: app.routes(),
 	}
 	err := server.ListenAndServe()
 
