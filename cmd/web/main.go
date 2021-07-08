@@ -7,12 +7,15 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/mycok/snippet-bin/pkg/models/mysql"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
 	infoLog *log.Logger
 	errLog *log.Logger
+	snippets *mysql.SnippetModel
 }
 
 func openDBConnection(dsn string) (*sql.DB, error) {
@@ -46,6 +49,7 @@ func main() {
 	app := &application{
 		infoLog: infoLog,
 		errLog: errLog,
+		snippets: &mysql.SnippetModel{ DB: db},
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
