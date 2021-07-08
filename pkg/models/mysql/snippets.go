@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/mycok/snippet-bin/pkg/models"
 )
@@ -28,7 +29,21 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 }
 
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
-	return nil, nil
+	query := `SELECT id, title, content, created, expires
+			FROM snippets
+			WHERE expires > UTC_TIMESTAMP() and id = ?`
+	// s refers to the newly constructed snippet
+	s := &models.Snippet{}
+	err := m.DB.QueryRow(query, id).Scan(&s.ID, &s.Tittle, &s.Content, &s.Created, &s.Expires)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNorRecord
+		} else {
+			return nil, err
+		}
+	}
+
+	return s, nil
 }
 
 func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
