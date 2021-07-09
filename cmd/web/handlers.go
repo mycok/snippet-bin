@@ -85,3 +85,16 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
 }
 
+func (app *application) showSnippets(w http.ResponseWriter, r *http.Request) {
+	result, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, err)
+
+		return
+	}
+
+	for _, snippet := range result {
+		fmt.Fprintf(w, "%v\n", snippet)
+	}
+}
+
