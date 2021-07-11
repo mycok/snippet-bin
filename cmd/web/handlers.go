@@ -17,6 +17,15 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	snippets, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, err)
+
+		return
+	}
+
+	data := &templateData{Snippets: snippets}
+
 	files := []string{
 		"./ui/html/home.page.go.tmpl",
 		"./ui/html/base.layout.go.tmpl",
@@ -30,7 +39,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, nil)
+	err = ts.Execute(w, data)
 	if err != nil {
 		app.serverError(w, err)
 
@@ -103,16 +112,4 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
 }
 
-func (app *application) showSnippets(w http.ResponseWriter, r *http.Request) {
-	result, err := app.snippets.Latest()
-	if err != nil {
-		app.serverError(w, err)
-
-		return
-	}
-
-	for _, snippet := range result {
-		fmt.Fprintf(w, "%v\n", snippet)
-	}
-}
 
