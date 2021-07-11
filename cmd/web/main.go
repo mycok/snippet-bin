@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +17,7 @@ type application struct {
 	infoLog *log.Logger
 	errLog *log.Logger
 	snippets *mysql.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func openDBConnection(dsn string) (*sql.DB, error) {
@@ -45,20 +47,26 @@ func main() {
 	}
 	// only necessary if the application a graceful shutdown mechanism
 	defer db.Close()
+	// cache all template pages when the application starts
+	templateCache, err := newTemplateCache("./ui/html/")
+	if err != nil {
+		errLog.Fatal(err)
+	}
 
 	app := &application{
 		infoLog: infoLog,
 		errLog: errLog,
 		snippets: &mysql.SnippetModel{ DB: db},
+		templateCache: templateCache,
 	}
-
-	infoLog.Printf("Starting server on %s", *addr)
 
 	server := &http.Server{
 		Addr: *addr,
 		ErrorLog: errLog,
 		Handler: app.routes(),
 	}
+
+	infoLog.Printf("Starting server on %s", *addr)
 	err = server.ListenAndServe()
 
 	errLog.Fatal(err)
