@@ -57,9 +57,27 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data := &templateData{Snippet: s}
 
+	files := []string{
+		"ui/html/show.page.go.tmpl",
+		"ui/html/base.layout.go.tmpl",
+		"ui/html/footer.partial.go.tmpl",
+	}
 
-	fmt.Fprintf(w, "%v", s)
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+
+		return
+	}
+
+	err = ts.Execute(w, data)
+	if err != nil {
+		app.serverError(w, err)
+
+		return
+	}
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
