@@ -138,6 +138,7 @@ nav a.live:after {
     background: #F7F9FA;
     border-left: 1px solid #E4E5E7;
     border-bottom: 1px solid #E4E5E7;
+    transform: rotate(45deg);
     -moz-transform: rotate(45deg);
     -webkit-transform: rotate(-45deg);
 }
@@ -226,12 +227,24 @@ button:hover {
     background-color: #FFFFFF;
     border: 1px solid #E4E5E7;
     border-radius: 3px;
+    word-break: break-all;
 }
 
 .snippet pre {
     padding: 18px;
     border-top: 1px solid #E4E5E7;
     border-bottom: 1px solid #E4E5E7;
+}
+
+.snippet code {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    
 }
 
 .snippet .metadata {

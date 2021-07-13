@@ -49,16 +49,16 @@ func (app *application) createSnippetForm(wr http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) createSnippet(wr http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		wr.Header().Set("Allow", http.MethodPost)
-		app.clientError(wr, http.StatusMethodNotAllowed)
-	
-		return
-	}
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(wr, http.StatusBadRequest)
 
-	title := "O snail"
-	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
-	expires := "7"
+		return
+	}	
+
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires := r.PostForm.Get("expires")
 	
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
