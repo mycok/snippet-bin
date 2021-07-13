@@ -3,20 +3,20 @@ package main
 import (
 	"net/http"
 
-	"github.com/justinas/alice"
+	"github.com/go-chi/chi/v5"
 )
 
 func (app *application) routes() http.Handler {
-	// create a middleware chain to be used on every request
-	appMiddleware := alice.New(app.recoverFromPanic, app.logRequest, secureHeaders)
-	mux := http.NewServeMux()
+	mux := chi.NewRouter()
+	mux.Use(app.recoverFromPanic, app.logRequest, secureHeaders)
 
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet", app.showSnippet)
-	mux.HandleFunc("/snippet/create", app.createSnippet)
+	mux.Get("/", app.home)
+	mux.Post("/snippet/create", app.createSnippet)
+	mux.Get("/snippet/create", app.createSnippetForm)
+	mux.Get("/snippet/{id}", app.showSnippet)
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	return appMiddleware.Then(mux)
+	return mux
 }
