@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/mycok/snippet-bin/pkg/forms"
 	"github.com/mycok/snippet-bin/pkg/models"
 )
 
@@ -47,7 +46,9 @@ func (app *application) showSnippet(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createSnippetForm(wr http.ResponseWriter, r *http.Request) {
-	app.render(wr, r, "create.page.go.tmpl", nil)
+	app.render(wr, r, "create.page.go.tmpl", &templateData{
+		Form: forms.New(nil),
+	})
 }
 
 func (app *application) createSnippet(wr http.ResponseWriter, r *http.Request) {
@@ -56,40 +57,20 @@ func (app *application) createSnippet(wr http.ResponseWriter, r *http.Request) {
 		app.clientError(wr, http.StatusBadRequest)
 
 		return
-	}	
-
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-	expires := r.PostForm.Get("expires")
-
-	errors := make(map[string]string)
-
-	if strings.TrimSpace(title) == "" {
-		errors["title"] = "This field cannot be blank"
-	} else if utf8.RuneCountInString(title) > 100 {
-		errors["title"] = "This value is too long. (maximum allowed is 100 characters)"
 	}
 
-	if strings.TrimSpace(content) == "" {
-		errors["content"] = "This field cannot be blank"
-	}
+	form := forms.New(r.PostForm)
+	form.Required("title", "content", "expires")
+	form.MaxLength("title", 100)
+	form.PermittedValues("expires", "365", "7", "1")
 
-	if strings.TrimSpace(expires) == "" {
-		errors["expires"] = "This field cannot be blank"
-	} else if expires != "365" && expires != "7" && expires != "1" {
-		errors["expires"] = "This field is invalid"
-	}
-
-	if len(errors) > 0 {
-		app.render(wr, r, "create.page.go.tmpl", &templateData{
-			FormData: r.PostForm,
-			FormErrors: errors,
-		})
+	if !form.IsValid() {
+		app.render(wr, r, "create.page.go.tmpl", &templateData{Form: form})
 
 		return
 	}
 	
-	id, err := app.snippets.Insert(title, content, expires)
+	id, err := app.snippets.Insert(form.Get("title"), form.Get("content"), form.Get("expires"))
 	if err != nil {
 		app.serverError(wr, err)
 
