@@ -2,10 +2,10 @@ package main
 
 import (
 	"html/template"
-	"net/url"
 	"path/filepath"
 	"time"
 
+	"github.com/mycok/snippet-bin/pkg/forms"
 	"github.com/mycok/snippet-bin/pkg/models"
 )
 
@@ -13,8 +13,7 @@ type templateData struct {
 	CurrentYear int
 	Snippet *models.Snippet
 	Snippets []*models.Snippet
-	FormData url.Values
-	FormErrors map[string]string
+	Form *forms.Form
 }
 
 // create a humanDate function which returns a nicely formatted string
