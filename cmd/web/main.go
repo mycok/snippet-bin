@@ -53,7 +53,7 @@ func main() {
 	// only necessary if the application a graceful shutdown mechanism
 	defer db.Close()
 	// cache all template pages when the application starts
-	templateCache, err := newTemplateCache("./ui/html/")
+	tempCache, err := newTemplateCache("./ui/html/")
 	if err != nil {
 		errLog.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func main() {
 		infoLog: infoLog,
 		errLog: errLog,
 		snippets: &mysql.SnippetModel{ DB: db},
-		templateCache: templateCache,
+		templateCache: tempCache,
 		session: session,
 	}
 
@@ -75,7 +75,7 @@ func main() {
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
-	server := &http.Server{
+	s := &http.Server{
 		Addr: *addr,
 		TLSConfig: tlsConfig,
 		ErrorLog: errLog,
@@ -86,7 +86,7 @@ func main() {
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
-	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = s.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	errLog.Fatal(err)
 }
