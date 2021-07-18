@@ -37,7 +37,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	err := m.DB.QueryRow(query, id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, models.ErrNorRecord
+			return nil, models.ErrNoRecord
 		} else {
 			return nil, err
 		}
