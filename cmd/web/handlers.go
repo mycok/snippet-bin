@@ -33,7 +33,7 @@ func (app *application) showSnippet(rw http.ResponseWriter, r *http.Request) {
 
 	snippet, err := app.snippets.Get(id)
 	if err != nil {
-		if errors.Is(err, models.ErrNorRecord) {
+		if errors.Is(err, models.ErrNoRecord) {
 			app.notFoundError(rw)
 		} else {
 			app.serverError(rw, err)
