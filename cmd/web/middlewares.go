@@ -40,3 +40,19 @@ func (app *application) recoverFromPanic(next http.Handler) http.Handler {
 		next.ServeHTTP(wr, r)
 	})
 }
+
+func (app *application) requireAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if !app.isAuthenticated(r) {
+			http.Redirect(rw, r, "/login", http.StatusSeeOther)
+
+			return
+		}
+		// set the "Cache-Control: no-store" header so that pages that
+		// require authentication are not stored in the users browser cache 
+		// other intermediary cache
+		rw.Header().Add("Cache-Control", "no-store")
+
+		next.ServeHTTP(rw, r)
+	})
+}
