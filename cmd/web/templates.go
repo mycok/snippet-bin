@@ -10,6 +10,7 @@ import (
 )
 
 type templateData struct {
+	IsAuthenticated bool
 	CurrentYear int
 	Flash string
 	Snippet *models.Snippet
