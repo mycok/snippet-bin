@@ -8,20 +8,20 @@ import (
 	"time"
 )
 
-func (app *application) serverError(wr http.ResponseWriter, err error) {
+func (app *application) serverError(rw http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	app.errLog.Output(2, trace)
 
-	http.Error(wr, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func (app *application) clientError(wr http.ResponseWriter, status int) {
-	http.Error(wr, http.StatusText(status), status)
+func (app *application) clientError(rw http.ResponseWriter, status int) {
+	http.Error(rw, http.StatusText(status), status)
 }
 
 // wrapper around clientError for notFoundError
-func (app *application) notFoundError(wr http.ResponseWriter) {
-	app.clientError(wr, http.StatusNotFound)
+func (app *application) notFoundError(rw http.ResponseWriter) {
+	app.clientError(rw, http.StatusNotFound)
 }
 
 func (app *application) addDefaultTemplateData(td *templateData, r *http.Request) *templateData {
@@ -30,14 +30,15 @@ func (app *application) addDefaultTemplateData(td *templateData, r *http.Request
 	}
 	td.CurrentYear = time.Now().Year()
 	td.Flash = app.session.PopString(r, "flash")
+	td.IsAuthenticated = app.isAuthenticated(r)
 
 	return td
 }
 
-func (app *application) render(wr http.ResponseWriter, r *http.Request, name string, td *templateData) {
+func (app *application) render(rw http.ResponseWriter, r *http.Request, name string, td *templateData) {
 	templateSet, ok := app.templateCache[name]
 	if !ok {
-		app.serverError(wr, fmt.Errorf("The template %s does not exit", name))
+		app.serverError(rw, fmt.Errorf("The template %s does not exit", name))
 
 		return
 	}
@@ -49,10 +50,14 @@ func (app *application) render(wr http.ResponseWriter, r *http.Request, name str
 	// excute the template set passing in dynamic data with the current year injected
 	err := templateSet.Execute(buf, app.addDefaultTemplateData(td, r))
 	if err != nil {
-		app.serverError(wr, err)
+		app.serverError(rw, err)
 
 		return
 	}
 	// write the contents of the buffer to http.ResponseWriter
-	buf.WriteTo(wr)
+	buf.WriteTo(rw)
+}
+
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.session.Exists(r, "authenticatedUserID")
 }
