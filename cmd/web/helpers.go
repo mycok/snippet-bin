@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"runtime/debug"
 	"time"
+
+	"github.com/justinas/nosurf"
 )
 
 func (app *application) serverError(rw http.ResponseWriter, err error) {
@@ -31,6 +33,7 @@ func (app *application) addDefaultTemplateData(td *templateData, r *http.Request
 	td.CurrentYear = time.Now().Year()
 	td.Flash = app.session.PopString(r, "flash")
 	td.IsAuthenticated = app.isAuthenticated(r)
+	td.CSRFToken = nosurf.Token(r)
 
 	return td
 }
