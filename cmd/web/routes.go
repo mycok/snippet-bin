@@ -10,14 +10,13 @@ func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
 	mux.Use(app.recoverFromPanic, app.logRequest, secureHeaders)
 
-	mux.Get("/signUp", app.signUpForm)
-	mux.Post("/signUp", app.signUp)
-	mux.Get("/login", app.loginForm)
-	mux.Post("/login", app.login)
-	mux.Post("/logout", app.logout)
-
 	mux.Route("/", func(mux chi.Router) {
 		mux.With(app.session.Enable).Get("/", app.home)
+		mux.With(app.session.Enable).Get("/signup", app.signupForm)
+		mux.With(app.session.Enable).Post("/signup", app.signup)
+		mux.With(app.session.Enable).Get("/login", app.loginForm)
+		mux.With(app.session.Enable).Post("/login", app.login)
+		mux.With(app.session.Enable).Post("/logout", app.logout)
 		mux.With(app.session.Enable).Post("/snippet/create", app.createSnippet)
 		mux.With(app.session.Enable).Get("/snippet/create", app.createSnippetForm)
 		mux.With(app.session.Enable).Get("/snippet/{id}", app.showSnippet)
