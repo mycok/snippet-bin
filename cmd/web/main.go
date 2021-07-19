@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
-	"flag"
 	"html/template"
 	"log"
 	"net/http"
@@ -43,15 +42,25 @@ func openDBConnection(dsn string) (*sql.DB, error) {
 }
 
 func main() {
-	addr := flag.String("addr", ":4000", "HTTP socket address env variable")
-	dsn := flag.String("dsn", "webu:webu@/snippet_box?parseTime=true", "MysQL data source name")
-	secret := flag.String("secret", "yeueuu+hffs24453+42fggsg*yu@etyr", "Secret key")
-	flag.Parse()
+	addr, ok := os.LookupEnv("PORT")
+	if !ok {
+		addr = ":4000"
+	}
+
+	dsn, ok := os.LookupEnv("DATABASE_URL")
+	if !ok {
+		dsn = "webu:webu@/snippet_box?parseTime=true"
+	}
+
+	secret, ok := os.LookupEnv("SECRET")
+	if !ok {
+		secret = "yeueuu+hffs24453+42fggsg*yu@etyr"
+	}
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	db, err := openDBConnection(*dsn)
+	db, err := openDBConnection(dsn)
 	if err != nil {
 		errLog.Fatal(err)
 	}
@@ -63,7 +72,7 @@ func main() {
 		errLog.Fatal(err)
 	}
 
-	session := sessions.New([]byte(*secret))
+	session := sessions.New([]byte(secret))
 	session.Lifetime = 12 * time.Hour
 	session.Secure = true
 
@@ -82,7 +91,7 @@ func main() {
 	}
 
 	s := &http.Server{
-		Addr: *addr,
+		Addr: addr,
 		TLSConfig: tlsConfig,
 		ErrorLog: errLog,
 		IdleTimeout: time.Minute,
@@ -91,7 +100,7 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	infoLog.Printf("Starting server on %s", *addr)
+	infoLog.Printf("Starting server on %s", addr)
 	err = s.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	errLog.Fatal(err)
