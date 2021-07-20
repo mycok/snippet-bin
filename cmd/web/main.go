@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -91,7 +92,7 @@ func main() {
 	}
 
 	s := &http.Server{
-		Addr: addr,
+		Addr: fmt.Sprintf(":%s", addr),
 		TLSConfig: tlsConfig,
 		ErrorLog: errLog,
 		IdleTimeout: time.Minute,
@@ -100,7 +101,7 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	infoLog.Printf("Starting server on %s", addr)
+	infoLog.Printf("Starting server on %s", fmt.Sprintf(":%s", addr))
 	err = s.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	errLog.Fatal(err)
