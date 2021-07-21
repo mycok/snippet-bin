@@ -22,7 +22,11 @@ type templateData struct {
 // create a humanDate function which returns a nicely formatted string
 // representation of a time.Time object.
 func humanReadableDate(t time.Time) string {
-	return t.Format("02 Jan 2006 at 15:04")
+	if t.IsZero() {
+		return ""
+	}
+
+	return t.UTC().Format("02 Jan 2006 at 15:04")
 }
 // initialize a template.FuncMap object as a global variable
 // it's used to map our custom template function string names with the actual functions
