@@ -9,6 +9,7 @@ import (
 )
 
 var EmailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
 type Form struct {
 	url.Values
 	Errors errors
@@ -81,6 +82,3 @@ func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 func (f *Form) IsValid() bool {
 	return len(f.Errors) == 0
 }
-
-
-
