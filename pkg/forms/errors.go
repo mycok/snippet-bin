@@ -2,7 +2,7 @@ package forms
 
 type errors map[string][]string
 
-func (e errors) Add(field, errMessage string)  {
+func (e errors) Add(field, errMessage string) {
 	e[field] = append(e[field], errMessage)
 }
 
