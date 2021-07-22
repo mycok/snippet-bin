@@ -20,11 +20,11 @@ type contextKey string
 const contextKeyIsAuthenticated = contextKey("isAuthenticated")
 
 type application struct {
-	session *sessions.Session
-	infoLog *log.Logger
-	errLog *log.Logger
-	snippets *mysql.SnippetModel
-	users *mysql.UserModel
+	session       *sessions.Session
+	infoLog       *log.Logger
+	errLog        *log.Logger
+	snippets      *mysql.SnippetModel
+	users         *mysql.UserModel
 	templateCache map[string]*template.Template
 }
 
@@ -77,21 +77,21 @@ func main() {
 	session.Secure = true
 
 	app := &application{
-		infoLog: infoLog,
-		errLog: errLog,
-		snippets: &mysql.SnippetModel{DB: db},
-		users: &mysql.UserModel{DB: db},
+		infoLog:       infoLog,
+		errLog:        errLog,
+		snippets:      &mysql.SnippetModel{DB: db},
+		users:         &mysql.UserModel{DB: db},
 		templateCache: tempCache,
-		session: session,
+		session:       session,
 	}
 
 	s := &http.Server{
-		Addr: fmt.Sprintf(":%s", addr),
-		ErrorLog: errLog,
-		IdleTimeout: time.Minute,
-		ReadTimeout: 5 * time.Second,
+		Addr:         fmt.Sprintf(":%s", addr),
+		ErrorLog:     errLog,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Handler: app.routes(),
+		Handler:      app.routes(),
 	}
 
 	infoLog.Printf("Starting server on %s", fmt.Sprintf(":%s", addr))
