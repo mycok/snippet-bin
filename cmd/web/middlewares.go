@@ -47,7 +47,7 @@ func (app *application) recoverFromPanic(next http.Handler) http.Handler {
 		// of a panic as Go unwinds the stack).
 		defer func() {
 			// Use the builtin recover function to check if there has been a
-			// panic or not. If there has...
+			// panic or not. If there was...
 
 			if err := recover(); err != nil {
 				wr.Header().Set("Connection", "Close")
@@ -59,7 +59,7 @@ func (app *application) recoverFromPanic(next http.Handler) http.Handler {
 	})
 }
 
-func (app *application) requireAuthorization(next http.Handler) http.Handler {
+func (app *application) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		if !app.isAuthenticated(r) {
 			http.Redirect(rw, r, "/login", http.StatusSeeOther)
@@ -68,7 +68,7 @@ func (app *application) requireAuthorization(next http.Handler) http.Handler {
 		}
 		// set the "Cache-Control: no-store" header so that pages that
 		// require authentication are not stored in the users browser cache
-		// other intermediary cache
+		// or other intermediary cache
 		rw.Header().Add("Cache-Control", "no-store")
 
 		next.ServeHTTP(rw, r)
@@ -92,6 +92,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		user, err := app.users.Get(app.session.GetInt(r, "authenticatedUserID"))
 		if errors.Is(err, models.ErrNoRecord) || !user.Active {
 			app.session.Remove(r, "authenticatedUserID")
+
 			next.ServeHTTP(rw, r)
 
 			return
