@@ -44,7 +44,7 @@ func openDBConnection(dsn string) (*sql.DB, error) {
 func main() {
 	addr, ok := os.LookupEnv("PORT")
 	if !ok {
-		addr = ":4000"
+		addr = "4000"
 	}
 
 	dsn, ok := os.LookupEnv("DATABASE_URL")

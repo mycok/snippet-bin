@@ -21,7 +21,7 @@ type templateData struct {
 
 // create a humanDate function which returns a nicely formatted string
 // representation of a time.Time object.
-func humanReadableDate(t time.Time) string {
+func formattedDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
@@ -32,13 +32,13 @@ func humanReadableDate(t time.Time) string {
 // initialize a template.FuncMap object as a global variable
 // it's used to map our custom template function string names with the actual functions
 var functions = template.FuncMap{
-	"humanReadableDate": humanReadableDate,
+	"formattedDate": formattedDate,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 	// Use the filepath.Glob function to get a slice of all filepaths with
-	// the extension '.page.tmpl'. This essentially gives us a slice of all the
+	// the extension '.page.go.tmpl'. This essentially gives us a slice of all the
 	// 'page' templates for the application.
 	pages, err := filepath.Glob(filepath.Join(dir, "*.page.go.tmpl"))
 	if err != nil {
@@ -46,7 +46,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	}
 
 	for _, page := range pages {
-		// Extract the file name (like 'home.page.tmpl') from the full file path
+		// Extract the file name (like 'home.page.go.tmpl') from the full file path
 		// and assign it to the name variable.
 		name := filepath.Base(page)
 		// The template.FuncMap must be registered with the template set before you
