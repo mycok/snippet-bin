@@ -16,9 +16,9 @@ func (app *application) routes() http.Handler {
 		mux.With(app.session.Enable, noSurf, app.authenticate).Post("/signup", app.signup)
 		mux.With(app.session.Enable, noSurf, app.authenticate).Get("/login", app.loginForm)
 		mux.With(app.session.Enable, noSurf, app.authenticate).Post("/login", app.login)
-		mux.With(app.session.Enable, noSurf, app.authenticate, app.requireAuthorization).Post("/logout", app.logout)
-		mux.With(app.session.Enable, noSurf, app.authenticate, app.requireAuthorization).Post("/snippet/create", app.createSnippet)
-		mux.With(app.session.Enable, noSurf, app.authenticate, app.requireAuthorization).Get("/snippet/create", app.createSnippetForm)
+		mux.With(app.session.Enable, noSurf, app.authenticate, app.requireAuthentication).Post("/logout", app.logout)
+		mux.With(app.session.Enable, noSurf, app.authenticate, app.requireAuthentication).Post("/snippet/create", app.createSnippet)
+		mux.With(app.session.Enable, noSurf, app.authenticate, app.requireAuthentication).Get("/snippet/create", app.createSnippetForm)
 		mux.With(app.session.Enable, noSurf, app.authenticate).Get("/snippet/{id}", app.showSnippet)
 	})
 
