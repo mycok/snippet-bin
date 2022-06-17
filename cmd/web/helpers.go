@@ -30,6 +30,7 @@ func (app *application) addDefaultTemplateData(td *templateData, r *http.Request
 	if td == nil {
 		td = &templateData{}
 	}
+
 	td.CurrentYear = time.Now().Year()
 	td.Flash = app.session.PopString(r, "flash")
 	td.IsAuthenticated = app.isAuthenticated(r)
@@ -41,7 +42,7 @@ func (app *application) addDefaultTemplateData(td *templateData, r *http.Request
 func (app *application) render(rw http.ResponseWriter, r *http.Request, name string, td *templateData) {
 	templateSet, ok := app.templateCache[name]
 	if !ok {
-		app.serverError(rw, fmt.Errorf("The template %s does not exit", name))
+		app.serverError(rw, fmt.Errorf("the template %s does not exit", name))
 
 		return
 	}
@@ -50,7 +51,7 @@ func (app *application) render(rw http.ResponseWriter, r *http.Request, name str
 	// http.ResponseWriter. If there's an error, call our serverError helper and then
 	// return.
 	buf := new(bytes.Buffer)
-	// excute the template set passing in dynamic data with the current year injected
+	// execute the template set passing in dynamic data with the current year injected.
 	err := templateSet.Execute(buf, app.addDefaultTemplateData(td, r))
 	if err != nil {
 		app.serverError(rw, err)
