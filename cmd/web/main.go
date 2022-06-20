@@ -9,7 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/mycok/snippet-bin/pkg/models/mysql"
+	"github.com/mycok/snippet-bin/pkg/models"
+	"github.com/mycok/snippet-bin/pkg/repository/mysql"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golangcollege/sessions"
@@ -23,8 +24,8 @@ type application struct {
 	session       *sessions.Session
 	infoLog       *log.Logger
 	errLog        *log.Logger
-	snippets      *mysql.SnippetModel
-	users         *mysql.UserModel
+	snippets      models.SnippetRepository
+	users         models.UserRepository
 	templateCache map[string]*template.Template
 }
 

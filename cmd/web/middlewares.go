@@ -96,6 +96,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			next.ServeHTTP(rw, r)
 
 			return
+
 		} else if err != nil {
 			app.serverError(rw, err)
 
