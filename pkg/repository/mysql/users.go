@@ -11,6 +11,20 @@ import (
 	"github.com/mycok/snippet-bin/pkg/models"
 )
 
+// Perform a compile time / static check to verify whether *UserModel type
+// satisfies UserRepository interface.
+var _ models.UserRepository = (*UserModel)(nil)
+
+const (
+	insertUser = `INSERT INTO users (name, email, hashed_password, created) 
+					VALUES(?, ?, ?, UTC_TIMESTAMP())`
+
+	authenticateUser = `SELECT id, hashed_password FROM users
+						WHERE email = ? AND active = TRUE`
+
+	getUserByID = `SELECT id, name, email, created, active FROM users WHERE id = ?`
+)
+
 type UserModel struct {
 	DB *sql.DB
 }
@@ -21,8 +35,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 		return err
 	}
 
-	query := `INSERT INTO users (name, email, hashed_password, created) VALUES(?, ?, ?, UTC_TIMESTAMP())`
-	_, err = m.DB.Exec(query, name, email, string(hash))
+	_, err = m.DB.Exec(insertUser, name, email, string(hash))
 	if err != nil {
 		var mySQLError *mysql.MySQLError
 		if errors.As(err, &mySQLError) {
@@ -41,8 +54,8 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	var id int
 	var hashedPassword []byte
 
-	query := `SELECT id, hashed_password FROM users WHERE email = ? AND active = TRUE`
-	row := m.DB.QueryRow(query, email)
+	row := m.DB.QueryRow(authenticateUser, email)
+
 	err := row.Scan(&id, &hashedPassword)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -66,8 +79,8 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 
 func (m *UserModel) Get(id int) (*models.User, error) {
 	u := &models.User{}
-	query := `SELECT id, name, email, created, active FROM users WHERE id = ?`
-	err := m.DB.QueryRow(query, id).Scan(&u.ID, &u.Name, &u.Email, &u.Created, &u.Active)
+
+	err := m.DB.QueryRow(getUserByID, id).Scan(&u.ID, &u.Name, &u.Email, &u.Created, &u.Active)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord
