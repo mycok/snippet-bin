@@ -7,15 +7,32 @@ import (
 	"github.com/mycok/snippet-bin/pkg/models"
 )
 
+// Perform a compile time / static check to verify whether *SnippetModel type
+// satisfies UserRepository interface.
+var _ models.SnippetRepository = (*SnippetModel)(nil)
+
+const (
+	insertSnippet = `INSERT INTO snippets (title, content, created, expires)
+	VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
+
+	getSnippetByID = `SELECT id, title, content, created, expires
+					FROM snippets
+					WHERE expires > UTC_TIMESTAMP() and id = ?`
+
+	latestSnippets = `SELECT id, title, content, created, expires
+					FROM snippets
+					WHERE expires > UTC_TIMESTAMP()
+					ORDER BY created
+					DESC
+					LIMIT 10`
+)
+
 type SnippetModel struct {
 	DB *sql.DB
 }
 
 func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
-	query := `INSERT INTO snippets (title, content, created, expires)
-	VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
-
-	result, err := m.DB.Exec(query, title, content, expires)
+	result, err := m.DB.Exec(insertSnippet, title, content, expires)
 	if err != nil {
 		return 0, err
 	}
@@ -29,12 +46,11 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 }
 
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
-	query := `SELECT id, title, content, created, expires
-			FROM snippets
-			WHERE expires > UTC_TIMESTAMP() and id = ?`
-	// s refers to the newly constructed snippet
 	s := &models.Snippet{}
-	err := m.DB.QueryRow(query, id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+
+	err := m.DB.QueryRow(getSnippetByID, id).Scan(
+		&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord
@@ -47,14 +63,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 }
 
 func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
-	query := `SELECT id, title, content, created, expires
-			FROM snippets
-			WHERE expires > UTC_TIMESTAMP()
-			ORDER BY created
-			DESC
-			LIMIT 10`
-
-	rows, err := m.DB.Query(query)
+	rows, err := m.DB.Query(latestSnippets)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +74,7 @@ func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 
 	for rows.Next() {
 		s := &models.Snippet{}
+
 		err := rows.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
 		if err != nil {
 			return nil, err
