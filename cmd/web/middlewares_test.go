@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -286,16 +285,14 @@ func Test_authenticate(t *testing.T) {
 	session.Lifetime = 10 * time.Second
 
 	// Logger to log application errors.
-	errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	// Make sure that application error logs don't appear in standard output
+	// during testing by using io.Discard writer object as the out destination.
+	errLog := log.New(io.Discard, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	app := &application{
 		session: session,
 		errLog:  errLog,
 	}
-
-	// Make sure that application error logs don't appear in standard output
-	// during testing.
-	app.errLog.SetOutput(io.Discard)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
