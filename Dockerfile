@@ -1,12 +1,12 @@
-FROM golang:1.20-alpine3.17 AS build
+FROM golang:1.20-alpine3.17 AS builder
 WORKDIR /src/
-COPY . /src/
+COPY . .
 RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux \
     go build -a \
-    ldflags "-extldflags '-static' -w -s" \
-    -o /bin/app /src/
+    -ldflags "-extldflags '-static' -w -s" \
+    -o /src/bin/app ./cmd/web
 
-FROM alpine3.17
-COPY --from=build /bin/app /bin/app
+FROM alpine:3.17
+COPY --from=builder /src/bin/app /src/bin/app
 EXPOSE 4000
-CMD [ "/bin/app" ]
+CMD [ "/src/bin/app" ]
