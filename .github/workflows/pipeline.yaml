@@ -23,7 +23,7 @@ jobs:
       - name: Copy files # step 4
         run: |
             mkdir artifacts
-            cp app artifacts/ .
+            cp app artifacts/
 
       - name: Archieve # step 5
         uses: actions/upload-artifact@v3
